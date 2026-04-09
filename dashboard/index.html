@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project I.H.L — Intelligent Hiring Loop</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080c10;
+    --surface: #0d1117;
+    --surface2: #161b22;
+    --border: #21262d;
+    --accent: #00f5a0;
+    --accent2: #00d4ff;
+    --warn: #f5a623;
+    --danger: #ff4757;
+    --text: #e6edf3;
+    --muted: #7d8590;
+    --glow: 0 0 20px rgba(0, 245, 160, 0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(0,245,160,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,245,160,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Glowing orb */
+  body::after {
+    content: '';
+    position: fixed;
+    top: -200px;
+    right: -200px;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(0,245,160,0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  header {
+    padding: 32px 0 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 32px;
+    animation: fadeDown 0.6s ease both;
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-badge {
+    background: var(--accent);
+    color: var(--bg);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 8px;
+    letter-spacing: 0.1em;
+  }
+
+  .logo-title {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .logo-title span {
+    color: var(--accent);
+  }
+
+  .header-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s infinite;
+  }
+
+  /* Stats bar */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+    animation: fadeUp 0.6s ease 0.1s both;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .stat-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: var(--glow);
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
+  }
+
+  .stat-card:hover::before { transform: scaleX(1); }
+
+  .stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .stat-value {
+    font-family: 'Space Mono', monospace;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    counter-reset: num var(--n);
+  }
+
+  .stat-value.warn { color: var(--warn); }
+  .stat-value.info { color: var(--accent2); }
+  .stat-value.danger { color: var(--danger); }
+
+  .stat-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  /* Controls */
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    animation: fadeUp 0.6s ease 0.2s both;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  .btn-primary:hover {
+    background: #00ffaa;
+    box-shadow: 0 0 24px rgba(0,245,160,0.4);
+    transform: translateY(-1px);
+  }
+
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .btn-secondary.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0,245,160,0.05);
+  }
+
+  .search-box {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 16px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .search-box:focus {
+    border-color: var(--accent);
+  }
+
+  .search-box::placeholder { color: var(--muted); }
+
+  /* Progress bar */
+  .progress-container {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 20px;
+    margin-bottom: 24px;
+    display: none;
+    animation: fadeUp 0.3s ease both;
+  }
+
+  .progress-container.active { display: block; }
+
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .progress-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+  }
+
+  .progress-pct {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .progress-track {
+    height: 4px;
+    background: var(--border);
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    width: 0%;
+    transition: width 0.4s ease;
+    box-shadow: 0 0 12px rgba(0,245,160,0.5);
+  }
+
+  .progress-steps {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .progress-step {
+    flex: 1;
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    text-align: center;
+    letter-spacing: 0.05em;
+    transition: all 0.3s;
+  }
+
+  .progress-step.done {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0,245,160,0.05);
+  }
+
+  .progress-step.active {
+    border-color: var(--accent2);
+    color: var(--accent2);
+    background: rgba(0,212,255,0.05);
+    animation: stepPulse 1s infinite;
+  }
+
+  /* Log feed */
+  .log-feed {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 16px;
+    margin-bottom: 24px;
+    height: 120px;
+    overflow-y: auto;
+    display: none;
+  }
+
+  .log-feed.active { display: block; }
+
+  .log-line {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    padding: 2px 0;
+    animation: fadeIn 0.3s ease both;
+  }
+
+  .log-line.success { color: var(--accent); }
+  .log-line.info { color: var(--accent2); }
+  .log-line.warn { color: var(--warn); }
+
+  /* Table */
+  .table-section {
+    animation: fadeUp 0.6s ease 0.3s both;
+  }
+
+  .table-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .table-title {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .table-count {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .jobs-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .jobs-table th {
+    text-align: left;
+    padding: 10px 16px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+  }
+
+  .jobs-table th:hover { color: var(--accent); }
+
+  .jobs-table td {
+    padding: 14px 16px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  .jobs-table tr {
+    transition: background 0.15s;
+    animation: fadeIn 0.3s ease both;
+  }
+
+  .jobs-table tr:hover td {
+    background: var(--surface2);
+  }
+
+  .job-title {
+    font-weight: 600;
+    color: var(--text);
+    max-width: 260px;
+  }
+
+  .job-title a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .job-title a:hover { color: var(--accent); }
+
+  .job-company {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 2px;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border: 1px solid;
+  }
+
+  .badge-found {
+    color: var(--accent2);
+    border-color: rgba(0,212,255,0.3);
+    background: rgba(0,212,255,0.05);
+  }
+
+  .badge-applied {
+    color: var(--accent);
+    border-color: rgba(0,245,160,0.3);
+    background: rgba(0,245,160,0.05);
+  }
+
+  .badge-responded {
+    color: var(--warn);
+    border-color: rgba(245,166,35,0.3);
+    background: rgba(245,166,35,0.05);
+  }
+
+  .badge-skipped {
+    color: var(--muted);
+    border-color: var(--border);
+    background: transparent;
+  }
+
+  .relevance-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .relevance-track {
+    width: 60px;
+    height: 4px;
+    background: var(--border);
+    overflow: hidden;
+  }
+
+  .relevance-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.6s ease;
+  }
+
+  .relevance-fill.med { background: var(--warn); }
+  .relevance-fill.low { background: var(--danger); }
+
+  .relevance-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    min-width: 28px;
+  }
+
+  .date-cell {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .action-btn {
+    padding: 4px 12px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .action-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0,245,160,0.05);
+  }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 80px 0;
+    color: var(--muted);
+  }
+
+  .empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.3;
+  }
+
+  .empty-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+
+  .empty-sub {
+    font-size: 14px;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(8,12,16,0.85);
+    backdrop-filter: blur(4px);
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.2s ease both;
+  }
+
+  .modal-overlay.active { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    width: 600px;
+    max-width: 90vw;
+    max-height: 80vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease both;
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .modal-title {
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 20px;
+    transition: color 0.2s;
+  }
+
+  .modal-close:hover { color: var(--text); }
+
+  .modal-body {
+    padding: 24px;
+  }
+
+  .modal-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .modal-content {
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 16px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+  /* Animations */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0,245,160,0.4); }
+    50% { opacity: 0.7; box-shadow: 0 0 0 4px rgba(0,245,160,0); }
+  }
+
+  @keyframes stepPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  @keyframes scanline {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100vh); }
+  }
+
+  /* Scanline effect */
+  .scanline {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(0,245,160,0.1), transparent);
+    animation: scanline 4s linear infinite;
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  .footer {
+    padding: 32px 0;
+    margin-top: 48px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+</style>
+</head>
+<body>
+
+<div class="scanline"></div>
+
+<div class="container">
+
+  <!-- Header -->
+  <header>
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-badge">I.H.L</div>
+        <div class="logo-title">Intelligent <span>Hiring</span> Loop</div>
+      </div>
+      <div class="header-status">
+        <div class="status-dot"></div>
+        <span id="lastRun">Never run</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Stats -->
+  <div class="stats-bar" id="statsBar">
+    <div class="stat-card">
+      <div class="stat-label">Total Found</div>
+      <div class="stat-value" id="statTotal">0</div>
+      <div class="stat-sub">all time</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Applied</div>
+      <div class="stat-value" id="statApplied">0</div>
+      <div class="stat-sub">outreach sent</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Pending</div>
+      <div class="stat-value warn" id="statPending">0</div>
+      <div class="stat-sub">not yet applied</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Responses</div>
+      <div class="stat-value info" id="statResponded">0</div>
+      <div class="stat-sub">heard back</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Response Rate</div>
+      <div class="stat-value info" id="statRate">0%</div>
+      <div class="stat-sub">applied → response</div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <button class="btn btn-primary" onclick="runAgent()">▶ RUN AGENT</button>
+    <button class="btn btn-secondary active" id="filterAll" onclick="setFilter('all')">All</button>
+    <button class="btn btn-secondary" id="filterPending" onclick="setFilter('found')">Pending</button>
+    <button class="btn btn-secondary" id="filterApplied" onclick="setFilter('applied')">Applied</button>
+    <button class="btn btn-secondary" id="filterResponded" onclick="setFilter('responded')">Responded</button>
+    <input class="search-box" type="text" placeholder="Search jobs, companies..." oninput="searchJobs(this.value)">
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-container" id="progressContainer">
+    <div class="progress-header">
+      <div class="progress-label" id="progressLabel">Initializing...</div>
+      <div class="progress-pct" id="progressPct">0%</div>
+    </div>
+    <div class="progress-track">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div class="progress-steps">
+      <div class="progress-step" id="step1">SCRAPING</div>
+      <div class="progress-step" id="step2">FILTERING</div>
+      <div class="progress-step" id="step3">TAILORING</div>
+      <div class="progress-step" id="step4">OUTREACH</div>
+      <div class="progress-step" id="step5">DONE</div>
+    </div>
+  </div>
+
+  <!-- Log feed -->
+  <div class="log-feed" id="logFeed"></div>
+
+  <!-- Table -->
+  <div class="table-section">
+    <div class="table-header">
+      <div class="table-title">Job Listings</div>
+      <div class="table-count" id="tableCount">0 jobs</div>
+    </div>
+    <table class="jobs-table">
+      <thead>
+        <tr>
+          <th onclick="sortTable('title')">Job Title</th>
+          <th onclick="sortTable('date')">Date</th>
+          <th onclick="sortTable('relevance')">Relevance</th>
+          <th onclick="sortTable('status')">Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="jobsBody">
+      </tbody>
+    </table>
+    <div class="empty-state" id="emptyState" style="display:none;">
+      <div class="empty-icon">⚡</div>
+      <div class="empty-title">No jobs found</div>
+      <div class="empty-sub">Run the agent to start hunting</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Job Details</div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<div class="footer">
+  PROJECT I.H.L — INTELLIGENT HIRING LOOP — BUILT BY ALI SAIFEE
+</div>
+
+<script>
+  let allJobs = [];
+  let filteredJobs = [];
+  let currentFilter = 'all';
+  let currentSearch = '';
+  let sortCol = 'date';
+  let sortDir = -1;
+
+  // Load jobs from server
+  async function loadJobs() {
+    try {
+      const res = await fetch('/api/jobs');
+      const data = await res.json();
+      allJobs = data.jobs || [];
+      updateStats();
+      applyFilters();
+      document.getElementById('lastRun').textContent = data.last_run || 'Never run';
+    } catch(e) {
+      addLog('Could not connect to server. Make sure server.py is running.', 'warn');
+    }
+  }
+
+  function updateStats() {
+    const total = allJobs.length;
+    const applied = allJobs.filter(j => j.status === 'applied').length;
+    const pending = allJobs.filter(j => j.status === 'found').length;
+    const responded = allJobs.filter(j => j.status === 'responded').length;
+    const rate = applied > 0 ? Math.round((responded / applied) * 100) : 0;
+
+    animateNum('statTotal', total);
+    animateNum('statApplied', applied);
+    animateNum('statPending', pending);
+    animateNum('statResponded', responded);
+    document.getElementById('statRate').textContent = rate + '%';
+  }
+
+  function animateNum(id, target) {
+    const el = document.getElementById(id);
+    const start = parseInt(el.textContent) || 0;
+    const duration = 600;
+    const startTime = performance.now();
+    function update(now) {
+      const progress = Math.min((now - startTime) / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      el.textContent = Math.round(start + (target - start) * ease);
+      if (progress < 1) requestAnimationFrame(update);
+    }
+    requestAnimationFrame(update);
+  }
+
+  function setFilter(filter) {
+    currentFilter = filter;
+    ['filterAll','filterPending','filterApplied','filterResponded'].forEach(id => {
+      document.getElementById(id).classList.remove('active');
+    });
+    const map = {all:'filterAll', found:'filterPending', applied:'filterApplied', responded:'filterResponded'};
+    document.getElementById(map[filter]).classList.add('active');
+    applyFilters();
+  }
+
+  function searchJobs(query) {
+    currentSearch = query.toLowerCase();
+    applyFilters();
+  }
+
+  function applyFilters() {
+    filteredJobs = allJobs.filter(job => {
+      const matchFilter = currentFilter === 'all' || job.status === currentFilter;
+      const matchSearch = !currentSearch || 
+        job.title.toLowerCase().includes(currentSearch) || 
+        job.company.toLowerCase().includes(currentSearch);
+      return matchFilter && matchSearch;
+    });
+    filteredJobs.sort((a, b) => {
+      let av = a[sortCol] || '';
+      let bv = b[sortCol] || '';
+      return av < bv ? sortDir : av > bv ? -sortDir : 0;
+    });
+    renderTable();
+  }
+
+  function sortTable(col) {
+    if (sortCol === col) sortDir *= -1;
+    else { sortCol = col; sortDir = -1; }
+    applyFilters();
+  }
+
+  function getRelevance(job) {
+    const title = (job.title || '').toLowerCase();
+    const highMatch = ['network admin','it technician','it support','helpdesk','help desk','junior network'];
+    const midMatch = ['systems admin','deskside','desktop support','it analyst','cloud'];
+    if (highMatch.some(k => title.includes(k))) return 90 + Math.floor(Math.random()*10);
+    if (midMatch.some(k => title.includes(k))) return 65 + Math.floor(Math.random()*20);
+    return 40 + Math.floor(Math.random()*20);
+  }
+
+  function renderTable() {
+    const tbody = document.getElementById('jobsBody');
+    const empty = document.getElementById('emptyState');
+    document.getElementById('tableCount').textContent = filteredJobs.length + ' jobs';
+
+    if (filteredJobs.length === 0) {
+      tbody.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+
+    tbody.innerHTML = filteredJobs.map((job, i) => {
+      const rel = job.relevance || getRelevance(job);
+      const relClass = rel >= 75 ? '' : rel >= 55 ? 'med' : 'low';
+      const date = job.date ? new Date(job.date).toLocaleDateString('en-CA', {month:'short',day:'numeric'}) : '—';
+      const statusBadge = {
+        found: '<span class="badge badge-found">● Pending</span>',
+        applied: '<span class="badge badge-applied">✓ Applied</span>',
+        responded: '<span class="badge badge-responded">★ Responded</span>',
+        skipped: '<span class="badge badge-skipped">— Skipped</span>'
+      }[job.status] || '<span class="badge badge-found">● Found</span>';
+
+      return `<tr style="animation-delay:${i*0.03}s">
+        <td>
+          <div class="job-title"><a href="${job.url}" target="_blank">${job.title}</a></div>
+          <div class="job-company">${job.company} · ${job.location || 'Toronto'}</div>
+        </td>
+        <td class="date-cell">${date}</td>
+        <td>
+          <div class="relevance-bar">
+            <div class="relevance-track">
+              <div class="relevance-fill ${relClass}" style="width:${rel}%"></div>
+            </div>
+            <span class="relevance-num">${rel}%</span>
+          </div>
+        </td>
+        <td>${statusBadge}</td>
+        <td>
+          <div style="display:flex;gap:6px;">
+            <button class="action-btn" onclick="viewJob(${i})">View</button>
+            ${job.status === 'applied' ? 
+              `<button class="action-btn" onclick="markResponded(${job.id})">Response</button>` : 
+              `<button class="action-btn" onclick="markApplied(${job.id})">Applied</button>`
+            }
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  function viewJob(index) {
+    const job = filteredJobs[index];
+    document.getElementById('modalTitle').textContent = job.title;
+    document.getElementById('modalBody').innerHTML = `
+      <div class="modal-label">Company</div>
+      <div style="margin-bottom:16px;font-size:14px;font-weight:600;">${job.company}</div>
+      <div class="modal-label">Location</div>
+      <div style="margin-bottom:16px;font-size:13px;color:var(--muted);">${job.location || 'Toronto, ON'}</div>
+      <div class="modal-label">Job URL</div>
+      <div style="margin-bottom:16px;"><a href="${job.url}" target="_blank" style="color:var(--accent);font-family:'Space Mono',monospace;font-size:11px;">${job.url}</a></div>
+      <div class="modal-label">Description</div>
+      <div class="modal-content">${(job.description || 'No description available').substring(0, 800)}...</div>
+      <div class="modal-label">Tailored Summary</div>
+      <div class="modal-content">${job.tailored_summary || 'Not yet tailored — run the agent to generate.'}</div>
+    `;
+    document.getElementById('modalOverlay').classList.add('active');
+  }
+
+  function closeModal(event) {
+    if (!event || event.target === document.getElementById('modalOverlay')) {
+      document.getElementById('modalOverlay').classList.remove('active');
+    }
+  }
+
+  async function markApplied(jobId) {
+    try {
+      await fetch(`/api/jobs/${jobId}/applied`, {method:'POST'});
+      await loadJobs();
+    } catch(e) { addLog('Failed to update job status', 'warn'); }
+  }
+
+  async function markResponded(jobId) {
+    try {
+      await fetch(`/api/jobs/${jobId}/responded`, {method:'POST'});
+      await loadJobs();
+    } catch(e) { addLog('Failed to update job status', 'warn'); }
+  }
+
+  function addLog(msg, type='') {
+    const feed = document.getElementById('logFeed');
+    feed.classList.add('active');
+    const line = document.createElement('div');
+    line.className = `log-line ${type}`;
+    line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    feed.appendChild(line);
+    feed.scrollTop = feed.scrollHeight;
+  }
+
+  function setStep(n, state) {
+    for (let i = 1; i <= 5; i++) {
+      const el = document.getElementById(`step${i}`);
+      el.className = 'progress-step';
+      if (i < n) el.classList.add('done');
+      else if (i === n) el.classList.add('active');
+    }
+  }
+
+  function setProgress(pct, label) {
+    document.getElementById('progressBar').style.width = pct + '%';
+    document.getElementById('progressPct').textContent = pct + '%';
+    document.getElementById('progressLabel').textContent = label;
+  }
+
+  async function runAgent() {
+    const container = document.getElementById('progressContainer');
+    container.classList.add('active');
+    document.getElementById('logFeed').innerHTML = '';
+
+    addLog('Starting Job Hunter Agent...', 'info');
+    setProgress(5, 'Connecting to Adzuna API...');
+    setStep(1, 'active');
+
+    try {
+      const res = await fetch('/api/run', {method:'POST'});
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+
+      while (true) {
+        const {done, value} = await reader.read();
+        if (done) break;
+        const text = decoder.decode(value);
+        const lines = text.split('\n').filter(l => l.startsWith('data:'));
+        for (const line of lines) {
+          const data = JSON.parse(line.slice(5));
+          if (data.log) addLog(data.log, data.type || '');
+          if (data.progress) setProgress(data.progress, data.label || '');
+          if (data.step) setStep(data.step, 'active');
+          if (data.done) {
+            setProgress(100, 'Complete!');
+            setStep(5, 'done');
+            addLog('Agent finished!', 'success');
+            await loadJobs();
+          }
+        }
+      }
+    } catch(e) {
+      addLog('Agent run failed — is server.py running?', 'warn');
+      setProgress(0, 'Failed');
+    }
+  }
+
+  // Init
+  loadJobs();
+  setInterval(loadJobs, 30000);
+</script>
+</body>
+</html>
