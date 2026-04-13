@@ -41,7 +41,7 @@ AWS Academy Graduate - AWS Academy Cloud Developing | Amazon Web Services | Apr 
 """
 
 def tailor_resume(job: dict) -> dict:
-    print(f"✍️  Tailoring resume for: {job['title']} at {job['company']}...")
+    print(f"Tailoring resume for: {job['title']} at {job['company']}...")
 
     prompt = f"""You are an expert resume writer. Given the job posting below and the candidate's resume, do two things:
 
@@ -72,7 +72,6 @@ COVER LETTER:
 
     response = message.content[0].text
 
-    # Parse the response
     summary = ""
     cover_letter = ""
 
@@ -100,7 +99,7 @@ if __name__ == "__main__":
     }
 
     result = tailor_resume(test_job)
-    print("\n📄 TAILORED SUMMARY:")
+    print("\nTAILORED SUMMARY:")
     print(result["tailored_summary"])
-    print("\n📝 COVER LETTER:")
+    print("\nCOVER LETTER:")
     print(result["cover_letter"])

@@ -4,6 +4,8 @@ import sqlite3
 import json
 import subprocess
 import sys
+import os
+import copy
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -52,12 +54,17 @@ def set_responded(job_id):
 def run_agent():
     def generate():
         yield f"data: {json.dumps({'log': 'Agent starting...', 'type': 'info', 'progress': 5, 'step': 1})}\n\n"
+
+        env = copy.copy(os.environ)
+        env['PYTHONIOENCODING'] = 'utf-8'
+
         process = subprocess.Popen(
             [sys.executable, 'main.py'],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
-            bufsize=1
+            bufsize=1,
+            env=env
         )
         progress = 10
         step = 1

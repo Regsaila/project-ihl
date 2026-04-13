@@ -9,7 +9,7 @@ APP_ID = os.getenv("ADZUNA_APP_ID")
 APP_KEY = os.getenv("ADZUNA_APP_KEY")
 
 def scrape(job_title: str, location: str = "Toronto", pages: int = 3):
-    print(f"\n🔍 Searching for '{job_title}' jobs in '{location}'...")
+    print(f"\nSearching for '{job_title}' jobs in '{location}'...")
 
     jobs = []
 
@@ -25,7 +25,7 @@ def scrape(job_title: str, location: str = "Toronto", pages: int = 3):
         response = requests.get(url, params=params)
 
         if response.status_code != 200:
-            print(f"⚠️ API error on page {page}: {response.status_code}")
+            print(f"API error on page {page}: {response.status_code}")
             break
 
         results = response.json().get("results", [])
@@ -41,14 +41,14 @@ def scrape(job_title: str, location: str = "Toronto", pages: int = 3):
                 "salary": job.get("salary_min", "N/A")
             })
 
-    print(f"✅ Found {len(jobs)} jobs\n")
+    print(f"Found {len(jobs)} jobs\n")
     return jobs
 
 
 if __name__ == "__main__":
     results = scrape("IT Technician", "Toronto")
     for job in results:
-        print(f"🏢 {job['title']} at {job['company']}")
-        print(f"📍 {job['location']}")
-        print(f"🔗 {job['url']}")
+        print(f"{job['title']} at {job['company']}")
+        print(f"{job['location']}")
+        print(f"{job['url']}")
         print("-" * 50)
