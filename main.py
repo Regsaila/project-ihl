@@ -30,7 +30,7 @@ JOB_TITLES = [
     "Junior Network Engineer"
 ]
 LOCATION = "Toronto"
-DRY_RUN = True  # Set to False when ready to actually send
+DRY_RUN = False  # Set to False when ready to actually send
 
 def run():
     print("Job Hunter Agent Starting...\n")

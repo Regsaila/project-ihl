@@ -150,8 +150,8 @@ def outreach(job: dict) -> bool:
 
 if __name__ == "__main__":
     test_job = {
-        "title": "IT Support Technician",
-        "company": "Excis Compliance",
-        "url": "https://www.adzuna.ca/details/5672481175"
+        "title": "MSP Technician",
+        "company": "MSP Hire",
+        "url": "https://www.adzuna.ca/details/5560040332"
     }
     outreach(test_job)
